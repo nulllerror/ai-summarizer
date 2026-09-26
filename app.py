@@ -3,11 +3,20 @@ from transformers import pipeline
 from pypdf import PdfReader
 
 
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+summarizer = None
 
-def generate_summary(article):
-    
+
+@st.cache_resource
+def load_summarizer(token=None):
+    return pipeline("summarization", model="facebook/bart-large-cnn", token=token)
+
+def generate_summary(article, token=None):
+
+    # Load summarizer using cached function
+    summarizer = load_summarizer(token)
+
     chunk_size = 500
+
     chunks = [article[i:i + chunk_size] for i in range(0, len(article), chunk_size)]
 
    
@@ -29,6 +38,9 @@ def extract_text_from_pdf(uploaded_file):
 
 st.title("Text Summarizer App")
 
+st.sidebar.header("Settings")
+hf_token = st.sidebar.text_input("Hugging Face Token (Optional)", type="password")
+
 input_type = st.radio("Input type:", ["Paste text", "Upload PDF"])
 
 article_input = ""
@@ -43,7 +55,7 @@ else:
 
 if st.button("Generate Summary"):
     if article_input:
-        summary_result = generate_summary(article_input)
+        summary_result = generate_summary(article_input, token=hf_token)
         st.subheader("Summary:")
         st.write(summary_result)
     else:
