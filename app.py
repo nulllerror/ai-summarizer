@@ -8,7 +8,7 @@ summarizer = None
 
 @st.cache_resource
 def load_summarizer(token=None):
-    return pipeline("summarization", model="facebook/bart-large-cnn", token=token)
+    return pipeline("text-generation", model="facebook/bart-large-cnn", token=token)
 
 def generate_summary(article, token=None):
 
